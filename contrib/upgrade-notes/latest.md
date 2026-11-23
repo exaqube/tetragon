@@ -28,6 +28,8 @@ Depending on your setup, changes listed here might require a manual intervention
   action; now the Kubernetes API server and the agent's policy parser reject
   it up front. The check is case-sensitive, so change spellings such as
   `tracksock` and remove an empty `returnArgAction: ""`.
+* `matchPIDs`, `matchCapabilities`, `matchCapabilityChanges` and `matchNamespaceChanges` now enforce `MaxItems=1` validation.
+  BPF code was already expecting this, but it was never properly enforced via CRD.
 
 ### Events (protobuf API)
 
