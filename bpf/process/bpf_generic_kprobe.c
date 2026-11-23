@@ -97,10 +97,6 @@ struct {
 __attribute__((section((MAIN)), used)) int
 generic_kprobe_event(struct pt_regs *ctx)
 {
-#ifdef SHARED_KPROBE
-	if (!multi_kprobe_setup(ctx))
-		return 0;
-#endif
 	return generic_start_process_filter(ctx, (struct bpf_map_def *)&kprobe_calls);
 }
 
@@ -209,18 +205,23 @@ __attribute__((section(OVERRIDE), used)) int
 generic_kprobe_override(void *ctx)
 {
 	__u64 id = get_current_pid_tgid();
+	void *tasks = &override_tasks;
 	__s32 *error;
 
 #ifdef SHARED_KPROBE
-	if (!multi_kprobe_setup(ctx))
+	/* The override attachment gets its scope from its own cookie. */
+	__u32 scope = get_attach_cookie(ctx) >> 32;
+
+	tasks = map_lookup_elem(&override_tasks, &scope);
+	if (!tasks)
 		return 0;
 #endif
-	error = policy_lookup(&override_tasks, &id);
+	error = map_lookup_elem(tasks, &id);
 	if (!error)
 		return 0;
 
 	override_return(ctx, *error);
-	policy_delete(&override_tasks, &id);
+	map_delete_elem(tasks, &id);
 	return 0;
 }
 

@@ -1678,7 +1678,7 @@ func loadSharedMultiKprobes(bpfDir string, baseMaps []*program.Map) (*sharedMult
 
 		for mapName := range spec.Maps {
 			registry := multiPolicyMaps[mapName] || isMultiSelectorMap(mapName)
-			if !registry && mapName != "multi_scope" && mapName != "multi_cel" &&
+			if !registry && mapName != "multi_cel" &&
 				mapName != "kprobe_calls" && mapName != "retkprobe_calls" && mapName != "process_call_heap" {
 				continue
 			}
